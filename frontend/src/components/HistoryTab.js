@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import anonymousReviewService from '../services/anonymousReviewService';
 import CategoryBadge from './CategoryBadge';
-import ExportButton from './ExportButton';
+// import ExportButton from './ExportButton';
 import PRModal from './PRModal';
 
 const HistoryTab = () => {

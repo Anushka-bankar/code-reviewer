@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { X, Github, Loader2 } from 'lucide-react';
 import api from '../services/api';
 
@@ -10,18 +10,20 @@ const PRModal = ({ review, onClose, token }) => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(null);
 
-  useEffect(() => {
-    loadRepositories();
-  }, []);
-
-  const loadRepositories = async () => {
+  // ✅ FIX: wrapped in useCallback so dependency is stable
+  const loadRepositories = useCallback(async () => {
     try {
       const data = await api.getRepositories(token);
       setRepos(data.data || []);
     } catch {
       setError('Failed to load repositories');
     }
-  };
+  }, [token]);
+
+  // ✅ FIX: added loadRepositories to dependency array
+  useEffect(() => {
+    loadRepositories();
+  }, [loadRepositories]);
 
   const handleCreatePR = async () => {
     if (!selectedRepo || !filePath.trim()) {
@@ -62,7 +64,9 @@ const PRModal = ({ review, onClose, token }) => {
           <div className="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-green-500/30">
             <Github className="w-8 h-8 text-green-400" />
           </div>
-          <h3 className="text-lg sm:text-xl font-bold text-white mb-2">PR Created!</h3>
+          <h3 className="text-lg sm:text-xl font-bold text-white mb-2">
+            PR Created!
+          </h3>
           <p className="text-gray-400 mb-4 sm:mb-6">
             Pull Request #{success.prNumber} has been created successfully
           </p>
