@@ -1,13 +1,26 @@
-const { Octokit } = require("@octokit/rest");
+let Octokit; // will be loaded dynamically
 
 class GitHubPRService {
   constructor(accessToken) {
-    this.octokit = new Octokit({ auth: accessToken });
+    this.accessToken = accessToken;
+    this.octokit = null;
+  }
+
+  async init() {
+    if (!Octokit) {
+      const mod = await import("@octokit/rest");
+      Octokit = mod.Octokit;
+    }
+
+    if (!this.octokit) {
+      this.octokit = new Octokit({ auth: this.accessToken });
+    }
   }
 
   // List user's repositories
   async listRepositories() {
     try {
+      await this.init();
       const { data } = await this.octokit.repos.listForAuthenticatedUser({
         per_page: 100,
       });
@@ -20,13 +33,14 @@ class GitHubPRService {
   // Get file content from repo
   async getFileContent(owner, repo, path) {
     try {
+      await this.init();
       const { data } = await this.octokit.repos.getContent({
         owner,
         repo,
         path,
       });
       return {
-        content: Buffer.from(data.content, 'base64').toString('utf-8'),
+        content: Buffer.from(data.content, "base64").toString("utf-8"),
         sha: data.sha,
       };
     } catch (error) {
@@ -37,6 +51,7 @@ class GitHubPRService {
   // Create branch
   async createBranch(owner, repo, branchName, sha) {
     try {
+      await this.init();
       await this.octokit.git.createRef({
         owner,
         repo,
@@ -52,12 +67,13 @@ class GitHubPRService {
   // Update file on branch
   async updateFile(owner, repo, path, content, branchName, sha, message) {
     try {
+      await this.init();
       await this.octokit.repos.createOrUpdateFileContents({
         owner,
         repo,
         path,
         message,
-        content: Buffer.from(content).toString('base64'),
+        content: Buffer.from(content).toString("base64"),
         branch: branchName,
         sha,
       });
@@ -68,8 +84,9 @@ class GitHubPRService {
   }
 
   // Create Pull Request
-  async createPullRequest(owner, repo, title, body, head, base = 'main') {
+  async createPullRequest(owner, repo, title, body, head, base = "main") {
     try {
+      await this.init();
       const { data } = await this.octokit.pulls.create({
         owner,
         repo,
@@ -87,6 +104,7 @@ class GitHubPRService {
   // Get default branch
   async getDefaultBranch(owner, repo) {
     try {
+      await this.init();
       const { data } = await this.octokit.repos.get({ owner, repo });
       return data.default_branch;
     } catch (error) {
@@ -95,8 +113,9 @@ class GitHubPRService {
   }
 
   // Get latest commit SHA
-  async getLatestCommitSha(owner, repo, branch = 'main') {
+  async getLatestCommitSha(owner, repo, branch = "main") {
     try {
+      await this.init();
       const { data } = await this.octokit.repos.getBranch({
         owner,
         repo,
