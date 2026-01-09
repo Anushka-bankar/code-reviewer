@@ -1,11 +1,11 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const dbConnect = require('./config/db');
-const reviewRoutes = require('./routes/reviewRoutes');
-const githubRoutes = require('./routes/githubRoutes');
-const prRoutes = require('./routes/prRoutes');
-const errorHandler = require('./middleware/errorHandler');
+const dbConnect = require('../config/db');
+const reviewRoutes = require('../routes/reviewRoutes');
+const githubRoutes = require('../routes/githubRoutes');
+const prRoutes = require('../routes/prRoutes');
+const errorHandler = require('../middleware/errorHandler');
 
 const app = express();
 
