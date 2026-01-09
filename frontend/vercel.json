@@ -1,0 +1,13 @@
+{
+  "framework": "create-react-app",
+  "buildCommand": "react-scripts build",
+  "outputDirectory": "build",
+  "installCommand": "npm install",
+  "devCommand": "react-scripts start",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
