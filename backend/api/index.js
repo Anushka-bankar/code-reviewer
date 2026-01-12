@@ -9,8 +9,14 @@ const errorHandler = require('../middleware/errorHandler');
 
 const app = express();
 
-// Connect DB
-dbConnect();
+// 🔒 Safe DB connection for serverless
+let isConnected = false;
+async function connectDBOnce() {
+  if (isConnected) return;
+  await dbConnect();
+  isConnected = true;
+}
+connectDBOnce();
 
 // CORS config
 const corsOptions = {
