@@ -1,6 +1,6 @@
-
 const { reviewCodeWithAI } = require('../services/llmService');
 const Review = require('../models/Review');
+const dbConnect = require('../config/db'); // ✅ ADD THIS
 
 const ALLOWED_LANGUAGES = [
   'javascript', 'python', 'java', 'cpp', 'c', 'csharp', 'go', 'rust',
@@ -34,7 +34,7 @@ function calculateMetrics(code, detectedLanguage = 'javascript') {
   };
 }
 
-function calculateCyclomaticComplexity(code, language) {
+function calculateCyclomaticComplexity(code) {
   let complexity = 1;
   const patterns = [
     /\bif\b/g, /\belse if\b/g, /\bfor\b/g, /\bwhile\b/g,
@@ -57,15 +57,6 @@ function calculateCognitiveComplexity(code) {
     if (/\bif\b|\bfor\b|\bwhile\b/.test(line)) cognitive += 1 + nesting;
   });
   return Math.min(cognitive, 50);
-}
-
-function calculateNestingDepth(code) {
-  let max = 0, cur = 0;
-  for (const c of code) {
-    if (c === '{' || c === '(' || c === '[') max = Math.max(max, ++cur);
-    if (c === '}' || c === ')' || c === ']') cur = Math.max(0, cur - 1);
-  }
-  return max;
 }
 
 function detectIssues(code, language, linesOfCode) {
@@ -97,6 +88,8 @@ function calculateMaintainability(lines, complexity, issues) {
 
 exports.reviewCode = async (req, res, next) => {
   try {
+    await dbConnect(); // ✅ CONNECT DB INSIDE REQUEST
+
     const { code, language } = req.body;
     const userId = req.user?.githubId;
 
@@ -155,6 +148,8 @@ exports.reviewCode = async (req, res, next) => {
 /* ================= HISTORY ================= */
 
 exports.getReviewHistory = async (req, res) => {
+  await dbConnect(); // ✅ ADD
+
   const userId = req.user?.githubId;
   if (!userId) return res.json({ success: true, data: [] });
 
@@ -165,7 +160,17 @@ exports.getReviewHistory = async (req, res) => {
   res.json({ success: true, data: reviews });
 };
 
+exports.getReviewById = async (req, res) => {
+  await dbConnect(); // ✅ ADD
+
+  const review = await Review.findById(req.params.id);
+  if (!review) return res.status(404).json({ success: false });
+  res.json({ success: true, data: review });
+};
+
 exports.deleteReview = async (req, res) => {
+  await dbConnect(); // ✅ ADD
+
   const { id } = req.params;
   const userId = req.user?.githubId;
   if (!userId) return res.status(401).json({ success: false });
@@ -179,10 +184,4 @@ exports.deleteReview = async (req, res) => {
 
   await Review.findByIdAndDelete(id);
   res.json({ success: true });
-};
-
-exports.getReviewById = async (req, res) => {
-  const review = await Review.findById(req.params.id);
-  if (!review) return res.status(404).json({ success: false });
-  res.json({ success: true, data: review });
 };
