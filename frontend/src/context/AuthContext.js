@@ -82,8 +82,9 @@ export const AuthProvider = ({ children }) => {
   
   const login = () => {
   window.location.href =
-      `${import.meta.env.VITE_BACKEND_URL}/api/github/login`;
+      `${process.env.REACT_APP_API_BASE_URL}/api/github/login`;
   };
+
 
 
   const logout = () => {
