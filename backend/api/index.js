@@ -9,6 +9,7 @@ const errorHandler = require('../middleware/errorHandler');
 
 const app = express();
 
+/* ---------- Middleware ---------- */
 app.use(cors({
   origin: [
     'https://aireviewmate-gdg-nitk.vercel.app',
@@ -19,33 +20,44 @@ app.use(cors({
 
 app.use(express.json());
 
-// Root (optional but useful)
+/* ---------- Base Routes ---------- */
 app.get('/', (req, res) => {
   res.send('Code Reviewer Backend is running 🚀');
 });
 
-// Health
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', message: 'Server is running on Vercel' });
+  res.json({ status: 'OK', message: 'Server is running on Render' });
 });
 
-// Routes
+/* ---------- API Routes ---------- */
+console.log('🔧 Loading API routes...');
 app.use('/api/review', reviewRoutes);
 app.use('/api/github', githubRoutes);
 app.use('/api/pr', prRoutes);
+console.log('✅ API routes loaded');
 
-// 404
+/* ---------- 404 ---------- */
 app.use((req, res) => {
   res.status(404).json({ error: 'Route not found' });
 });
 
-// Errors
+/* ---------- Error Handler ---------- */
 app.use(errorHandler);
 
+/* ---------- Server ---------- */
 const PORT = process.env.PORT || 8000;
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
+});
+
+/* ---------- Safety Logs ---------- */
+process.on('unhandledRejection', (err) => {
+  console.error('❌ Unhandled Rejection:', err);
+});
+
+process.on('uncaughtException', (err) => {
+  console.error('❌ Uncaught Exception:', err);
 });
 
 module.exports = app;

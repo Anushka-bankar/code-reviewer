@@ -79,11 +79,12 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // ✅ FIX IS HERE (added /api)
+  
   const login = () => {
-    window.location.href =
-      `${process.env.REACT_APP_API_BASE_URL}/api/github/login`;
+  window.location.href =
+      `${import.meta.env.VITE_BACKEND_URL}/api/github/login`;
   };
+
 
   const logout = () => {
     window.localStorage?.removeItem('github_token');
